@@ -9,4 +9,4 @@ WARNING: new CH47 will always spawn just with common crew and loot. It won't wor
 
 Don't hesitate to continue with this project
 
-Discord server: https://discord.io/UltraRust
+Discord server: https://discord.io/UltraRust - please share your experience with other admins
