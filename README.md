@@ -5,7 +5,7 @@ On some Rust maps (modded with Oxide) CH47 spawns out of liveable map and all sc
 
 If CH47 spawned out of liveable area then the plugin kills the object and creates new one just on the map borders. 
 
-WARNING: new CH47 will always spawn just with common crew and loot. It won't work for the last part of Oil Rig event when a player starts to hack the locked crate and CH47 comes with heave scientists. I haven't found any way how to manage this.
+This patch shouldn't affect Oil Rig event (with heave scientits) as this CH47 spawns in livable area.
 
 Don't hesitate to continue with this project
 
