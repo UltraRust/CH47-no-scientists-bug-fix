@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("CH47NoScientistsBugFix", "Ultra", "2.0.3")]
+    [Info("CH47NoScientistsBugFix", "Ultra", "2.1.2")]
     [Description("CH47 respawns if it has spawned out of livable map")]
 
     class CH47NoScientistsBugFix : RustPlugin
-    {        
+    {
         bool initialized = false;
         int mapLimit = 0;
 
@@ -21,6 +19,7 @@ namespace Oxide.Plugins
             mapLimit = (ConVar.Server.worldsize / 2) * 3;
             if (mapLimit > 4000) mapLimit = 4000;
             initialized = true;
+            Log($"OnServerInitialized(): MapSize: {ConVar.Server.worldsize} / MapLimit set to {mapLimit}", logType: LogType.INFO);
         }
 
         void OnEntitySpawned(BaseEntity Entity)
@@ -35,13 +34,15 @@ namespace Oxide.Plugins
                 if (!IsInLivableArea(ch47.transform.position))
                 {
                     Log($"CH47 spawned out liveable area", logType: LogType.WARNING);
-                    timer.Once(1f, () => { ch47.Kill(); });               
+                    Log($"{ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z}", logType: LogType.WARNING);
+                    timer.Once(1f, () => { ch47.Kill(); });
                     Vector3 newPostition = GetFixedPosition(ch47.transform.position);
                     timer.Once(2f, () => { SpawnCH47Helicopter(newPostition); });
                 }
                 else
                 {
                     Log($"CH47 spawned in liveable area properly", logType: LogType.INFO);
+                    Log($"{ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z}", logType: LogType.INFO);
                 }
             }
         }
@@ -60,21 +61,23 @@ namespace Oxide.Plugins
         }
 
         Vector3 GetFixedPosition(Vector3 originalPosition)
-        {  
+        {
             Vector3 newPosition = originalPosition;
             if (originalPosition.x < -(mapLimit)) newPosition.x = -(mapLimit) + 50;
             if (originalPosition.x > mapLimit) newPosition.x = mapLimit - 50;
             if (originalPosition.z < -(mapLimit)) newPosition.z = -(mapLimit) + 50;
-            if (originalPosition.z > mapLimit) newPosition.z = mapLimit - 50;           
+            if (originalPosition.z > mapLimit) newPosition.z = mapLimit - 50;
             return newPosition;
         }
 
         void SpawnCH47Helicopter(Vector3 position)
         {
+            Unsubscribe(nameof(OnEntitySpawned));
             var ch47 = (CH47HelicopterAIController)GameManager.server.CreateEntity("assets/prefabs/npc/ch47/ch47scientists.entity.prefab", position);
             if (ch47 == null) return;
             ch47.Spawn();
-            Log($"New CH47 spawned: {ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z}", logType: LogType.INFO);
+            Subscribe(nameof(OnEntitySpawned));
+            Log($"Standby CH47 spawned: {ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z}", logType: LogType.WARNING);            
         }
 
         #endregion
@@ -93,7 +96,7 @@ namespace Oxide.Plugins
         }
 
         protected override void LoadConfig()
-        {            
+        {
             try
             {
                 base.LoadConfig();
