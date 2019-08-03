@@ -11,6 +11,7 @@ namespace Oxide.Plugins
     {
         bool initialized = false;
         int mapLimit = 0;
+        Timer currentPositionLogTimer;
 
         #region Hooks
 
@@ -47,6 +48,11 @@ namespace Oxide.Plugins
             }
         }
 
+        void Unload()
+        {
+            currentPositionLogTimer.Destroy();
+        }
+
         #endregion
 
         #region Core
@@ -63,10 +69,10 @@ namespace Oxide.Plugins
         Vector3 GetFixedPosition(Vector3 originalPosition)
         {
             Vector3 newPosition = originalPosition;
-            if (originalPosition.x < -(mapLimit)) newPosition.x = -(mapLimit) + 50;
-            if (originalPosition.x > mapLimit) newPosition.x = mapLimit - 50;
-            if (originalPosition.z < -(mapLimit)) newPosition.z = -(mapLimit) + 50;
-            if (originalPosition.z > mapLimit) newPosition.z = mapLimit - 50;
+            if (originalPosition.x < -(mapLimit)) newPosition.x = -(mapLimit) + 100;
+            if (originalPosition.x > mapLimit) newPosition.x = mapLimit - 100;
+            if (originalPosition.z < -(mapLimit)) newPosition.z = -(mapLimit) + 100;
+            if (originalPosition.z > mapLimit) newPosition.z = mapLimit - 100;
             return newPosition;
         }
 
@@ -76,8 +82,15 @@ namespace Oxide.Plugins
             var ch47 = (CH47HelicopterAIController)GameManager.server.CreateEntity("assets/prefabs/npc/ch47/ch47scientists.entity.prefab", position);
             if (ch47 == null) return;
             ch47.Spawn();
+            currentPositionLogTimer = timer.Repeat(15, 5, () => LogCurrentPosition(ch47));
             Subscribe(nameof(OnEntitySpawned));
-            Log($"Standby CH47 spawned: {ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z}", logType: LogType.WARNING);            
+            Log($"Standby CH47 spawned: {ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z}", logType: LogType.INFO);            
+        }
+
+        void LogCurrentPosition(CH47Helicopter ch47)
+        {
+            if (ch47 == null || ch47.IsDestroyed) return;
+            Log($"Current position: {ch47.transform.position.x}|{ch47.transform.position.y}|{ch47.transform.position.z} ", logType: LogType.INFO);
         }
 
         #endregion
@@ -142,10 +155,7 @@ namespace Oxide.Plugins
 
             if (configData.LogInConsole)
             {
-                Console.ForegroundColor = ConsoleColor.Gray;
-                if (logType == LogType.WARNING) Console.ForegroundColor = ConsoleColor.Yellow;
-                if (logType == LogType.ERROR) Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[{this.Title}] {message.Replace("\n", " ")}");
+                Puts($"{message.Replace("\n", " ")}");
             }
         }
 
