@@ -10,3 +10,5 @@ This patch shouldn't affect Oil Rig event (with heave scientits) as this CH47 sp
 Don't hesitate to continue with this project
 
 Discord server: https://discord.io/UltraRust - please share your experience with other admins
+
+UPDATE: the cause seems to be Oxide.Ext.RustIO.dll (Rust.IO maps). Anyway this plugin can fix the issue
